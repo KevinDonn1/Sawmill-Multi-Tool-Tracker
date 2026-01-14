@@ -3,62 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sawmill Handicap & Bag Tag League Manager</title>
+    <title>Sawmill Multi-Tool Tracker</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <header>
-        <h1>Sawmill Disc Golf League Manager</h1>
-        <p>The Sawmill • Silver Springs, FL • Sundays 9:00 a.m. • Check-in by 8:50 a.m.</p>
-        <p>Handicapped + Bag Tag League | 10 CTPs | Bogey-Free & Low Raw Buy-Ins</p>
+        <h1>Sawmill Multi-Tool Tracker</h1>
+        <p>CTP Flags • Bag Tags • Handicap Calculator • For Sawmill Disc Golf League</p>
     </header>
-    
-    <section id="setup">
-        <h2>Event Setup</h2>
-        <label for="course">Course/Layout:</label>
-        <input type="text" id="course" value="The Sawmill (24 Holes)" placeholder="e.g., The Sawmill Front 12 or Full 24">
-        
-        <label for="total-players">Total Players (10–30 avg):</label>
-        <input type="number" id="total-players" min="3" value="16">
-        
-        <h3>Players (Name, Handicap, Incoming Bag Tag # optional)</h3>
+
+    <div id="tabs">
+        <button class="tab-btn active" data-tab="ctp">CTP Flag Tracker</button>
+        <button class="tab-btn" data-tab="bagtag">Bag Tag Tracker</button>
+        <button class="tab-btn" data-tab="handicap">Handicap Calculator</button>
+    </div>
+
+    <!-- CTP Section -->
+    <section id="ctp" class="tab-content active">
+        <h2>CTP Flag Tracker</h2>
+        <label>Course Name:</label>
+        <input type="text" id="course-name" value="The Sawmill">
+
+        <label>Total Holes:</label>
+        <select id="total-holes">
+            <option value="24">24 Holes</option>
+            <option value="18">18 Holes</option>
+            <option value="custom">Custom</option>
+        </select>
+        <input type="number" id="custom-holes" style="display:none;" placeholder="Enter number">
+
+        <label>Group Starting Holes (comma-separated):</label>
+        <input type="text" id="group-starts" placeholder="1,10,12,21">
+
+        <label>CTP Holes (comma-separated):</label>
+        <input type="text" id="ctp-holes" placeholder="3,4,5,6,8,10,11,12,19,24">
+
+        <button id="generate-ctp">Generate Flag Assignments</button>
+
+        <div id="ctp-output" style="display:none;">
+            <h3>Assignments for <span id="course-display"></span></h3>
+            <div id="ctp-flags"></div>
+        </div>
+    </section>
+
+    <!-- Bag Tag Section -->
+    <section id="bagtag" class="tab-content" style="display:none;">
+        <h2>Bag Tag Tracker</h2>
         <div id="player-list"></div>
         <button id="add-player">Add Player</button>
-    </section>
-    
-    <section id="generate">
-        <button id="generate-btn">Generate Cards, CTPs & Pre-Round Summary</button>
-    </section>
-    
-    <section id="post-round" style="display: none;">
-        <h2>Post-Round Inputs</h2>
-        <p>Enter raw scores for each player below (lowest raw score wins bag tags, low raw buy-in, etc.). Handicaps are for net payouts only.</p>
-        <div id="post-player-list"></div>
-        <button id="finalize-btn">Finalize Results & Assign Bag Tags</button>
-    </section>
-    
-    <section id="output" style="display: none;">
-        <h2>Event Summary</h2>
-        <div id="cards"></div>
-        <div id="ctp-assignments"></div>
-        <div id="handicap-summary"></div>
-        <div id="bagtag-summary"></div>
-        <div id="buyins-payouts">
-            <h3>Buy-Ins & Payouts</h3>
-            <ul>
-                <li><strong>Mandatory $3/player</strong>: $1 to Ace Pot (auto-entry for all players), $2 to club</li>
-                <li><strong>CTP Entry (10 CTPs)</strong>: $5/player (optional) → 100% payout to 10 winners (one per CTP hole)</li>
-                <li><strong>Bogey-Free Round</strong>: $1? (optional) → 100% payout to winner(s) with no bogeys or worse</li>
-                <li><strong>Best Low Raw Score</strong>: $3? (optional) → 100% payout to player with lowest raw score</li>
-            </ul>
-            <p>Ace Pot: Everyone auto-entered via mandatory $1—track running total and winners separately (e.g., in a shared sheet).</p>
-            <p>Total potential buy-in per player: $3 mandatory + $5 CTP + optional extras.</p>
+
+        <button id="generate-bagtag">Prepare Scores & Assign Tags</button>
+
+        <div id="bagtag-scores" style="display:none;">
+            <h3>Enter Raw Scores (from UDisc)</h3>
+            <div id="score-list"></div>
+            <button id="assign-tags">Assign New Bag Tags</button>
         </div>
-        <button id="export-csv">Export to CSV</button>
-        <button id="save-event">Save This Event (for Next Week's Incoming Tags)</button>
-        <button id="load-event">Load Last Event (Use Outgoing as Incoming)</button>
+
+        <div id="bagtag-results" style="display:none;"></div>
+        <div id="current-tags" style="display:none;"></div>
+
+        <div style="margin-top:20px;">
+            <button id="save-tags">Save for Next Week</button>
+            <button id="load-tags">Load Last Week</button>
+        </div>
     </section>
-    
+
+    <!-- Handicap Calculator Section -->
+    <section id="handicap" class="tab-content" style="display:none;">
+        <h2>Handicap Calculator (Custom 0.4 Multiplier)</h2>
+        <p>Unlike UDisc (0.5–0.6 multiplier), we use 0.4 to reduce penalty for strong players.</p>
+
+        <label>Player Name:</label>
+        <input type="text" id="hc-name" placeholder="e.g., Kevin">
+
+        <label>Average Raw Score (last 10–20 rounds):</label>
+        <input type="number" id="hc-avg" step="0.1" placeholder="e.g., 52.3">
+
+        <label>Course Par:</label>
+        <input type="number" id="hc-par" placeholder="e.g., 54">
+
+        <button id="calc-handicap">Calculate Handicap</button>
+
+        <div id="hc-result" style="display:none; margin-top:20px;">
+            <h3>Result for <span id="hc-player"></span></h3>
+            <p>Raw Avg: <strong><span id="hc-raw"></span></strong></p>
+            <p>Net Adjustment: <strong><span id="hc-adjust"></span></strong> (0.4 × (Avg - Par))</p>
+            <p>Handicap: <strong><span id="hc-value"></span></strong></p>
+            <p class="note">Net Score = Raw Score + Handicap (positive = add strokes, negative = subtract)</p>
+        </div>
+    </section>
+
     <script src="script.js"></script>
 </body>
 </html>
